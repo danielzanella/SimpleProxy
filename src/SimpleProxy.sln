@@ -1,0 +1,55 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2012
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SimpleProxy", "SimpleProxy\SimpleProxy.csproj", "{5684B139-A086-4127-A351-33D94B946433}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Samples", "Samples", "{605812AD-1999-424A-8C1B-5E67C4C395D6}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SimpleProxy.Example", "SimpleProxy.Example\SimpleProxy.Example.csproj", "{AE1C1F0F-78A5-4D70-9B7D-6851A38D2757}"
+	ProjectSection(ProjectDependencies) = postProject
+		{E4B6FA71-E257-4021-ACF7-1366422790A5} = {E4B6FA71-E257-4021-ACF7-1366422790A5}
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SimpleProxy.WebApi.Test", "SimpleProxy.WebApi.Test\SimpleProxy.WebApi.Test.csproj", "{795D2D24-CC77-4896-A016-084F0CCD2078}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SimpleProxy.Wcf.Test", "SimpleProxy.Wcf.Test\SimpleProxy.Wcf.Test.csproj", "{E4B6FA71-E257-4021-ACF7-1366422790A5}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SimpleProxy.WebForms.Test", "SimpleProxy.WebForms.Test\SimpleProxy.WebForms.Test.csproj", "{32899472-E809-4968-9E3B-FDB8D6796EDE}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{5684B139-A086-4127-A351-33D94B946433}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5684B139-A086-4127-A351-33D94B946433}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5684B139-A086-4127-A351-33D94B946433}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5684B139-A086-4127-A351-33D94B946433}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AE1C1F0F-78A5-4D70-9B7D-6851A38D2757}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AE1C1F0F-78A5-4D70-9B7D-6851A38D2757}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AE1C1F0F-78A5-4D70-9B7D-6851A38D2757}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AE1C1F0F-78A5-4D70-9B7D-6851A38D2757}.Release|Any CPU.Build.0 = Release|Any CPU
+		{795D2D24-CC77-4896-A016-084F0CCD2078}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{795D2D24-CC77-4896-A016-084F0CCD2078}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{795D2D24-CC77-4896-A016-084F0CCD2078}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{795D2D24-CC77-4896-A016-084F0CCD2078}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E4B6FA71-E257-4021-ACF7-1366422790A5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E4B6FA71-E257-4021-ACF7-1366422790A5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E4B6FA71-E257-4021-ACF7-1366422790A5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E4B6FA71-E257-4021-ACF7-1366422790A5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{32899472-E809-4968-9E3B-FDB8D6796EDE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{32899472-E809-4968-9E3B-FDB8D6796EDE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{32899472-E809-4968-9E3B-FDB8D6796EDE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{32899472-E809-4968-9E3B-FDB8D6796EDE}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{AE1C1F0F-78A5-4D70-9B7D-6851A38D2757} = {605812AD-1999-424A-8C1B-5E67C4C395D6}
+		{795D2D24-CC77-4896-A016-084F0CCD2078} = {605812AD-1999-424A-8C1B-5E67C4C395D6}
+		{E4B6FA71-E257-4021-ACF7-1366422790A5} = {605812AD-1999-424A-8C1B-5E67C4C395D6}
+		{32899472-E809-4968-9E3B-FDB8D6796EDE} = {605812AD-1999-424A-8C1B-5E67C4C395D6}
+	EndGlobalSection
+EndGlobal
