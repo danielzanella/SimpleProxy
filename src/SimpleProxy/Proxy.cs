@@ -1,5 +1,6 @@
 ﻿namespace SimpleProxy
 {
+    using Newtonsoft.Json;
     using System;
     using System.Collections.Generic;
     using System.Diagnostics;
@@ -12,7 +13,6 @@
     using System.Runtime.Remoting.Proxies;
     using System.Text;
     using System.Web;
-    using Newtonsoft.Json;
 
     /// <summary>
     /// Simple RealProxy implementation that dispatches method calls as HTTP requests to remote servers.

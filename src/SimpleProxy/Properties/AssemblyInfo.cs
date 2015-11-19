@@ -6,11 +6,11 @@ using System.Runtime.InteropServices;
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
 [assembly: AssemblyTitle("SimpleProxy")]
-[assembly: AssemblyDescription("")]
+[assembly: AssemblyDescription("Simple RealProxy implementation that dispatches method calls as HTTP requests to remote servers.")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
 [assembly: AssemblyProduct("SimpleProxy")]
-[assembly: AssemblyCopyright("Copyright ©  2015")]
+[assembly: AssemblyCopyright("Copyright © 2015 Daniel Zanella Martins")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
