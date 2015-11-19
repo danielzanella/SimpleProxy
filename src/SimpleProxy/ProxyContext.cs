@@ -14,6 +14,9 @@
         /// <summary>
         /// Gets the list of remote requests.
         /// </summary>
+        /// <remarks>
+        /// Note that if you use the same proxy instance to make requests in more than one thread, Requests will contain information for requests sent in all threads.
+        /// </remarks>
         public IReadOnlyList<RequestContext> Requests 
         { 
             get 
@@ -28,16 +31,19 @@
         /// <returns>The remote request context.</returns>
         internal RequestContext CreateRequestContext()
         {
-            // avoid holding large response contents for longer than a minute.
-            DateTime minuteAgo = DateTime.UtcNow.AddMinutes(-1);
+            lock (m_requests)
+            {
+                // avoid holding large response contents for longer than a minute.
+                DateTime minuteAgo = DateTime.UtcNow.AddMinutes(-1);
 
-            m_requests.Where(r => null != r.ResponseContent && r.RequestTimestamp < minuteAgo).Select(r => r.ResponseContent = null);
+                m_requests.Where(r => null != r.ResponseContent && r.RequestTimestamp < minuteAgo).Select(r => r.ResponseContent = null);
 
-            var newRequestContext = new RequestContext();
+                var newRequestContext = new RequestContext();
 
-            m_requests.Add(newRequestContext);
+                m_requests.Add(newRequestContext);
 
-            return newRequestContext;
+                return newRequestContext;
+            }
         }
     }
 }
