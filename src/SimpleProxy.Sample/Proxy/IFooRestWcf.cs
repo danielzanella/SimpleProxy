@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 namespace SimpleProxy.Example.Proxy
 {
     [Resource("FooService.svc")]
-    public interface IFooRest2 : IFooRest
+    public interface IFooRestWcf : IFooRest
     {
         // This interface is here just so we can change the resource name
     }
