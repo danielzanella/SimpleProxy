@@ -13,7 +13,7 @@ Quick Instructions
 ======
 Considering a remote URL like `http://some-server/api/foo`, where the fragment `foo` maps to a `FooController`:
 
-1. Create an interface with a method that will describe the request and parameters you want to send:
+1. Create an interface with methods that describe the requests and parameters you want to execute:
 
         public interface IFoo {
             public IEnumerable<Bar> GetAllBars();
@@ -22,12 +22,12 @@ Considering a remote URL like `http://some-server/api/foo`, where the fragment `
             // ...
         }
     
-2. Decorate the interface with a `ResourceAttribute`, passing the fragment that corresponds to the controller:
+2. Decorate the interface with `ResourceAttribute`, specifying the fragment that corresponds to the controller:
 
         [Resource("foo")]
         public interface IFoo {
 
-3. Decorate the method call with a `HttpMethod` attribute describing the http verb used in the request:
+3. Decorate the method call with `HttpMethodAttribute` describing the HTTP verb used in the request:
 
             // GET /foo
             [HttpMethod(HttpMethod.Get)]
@@ -37,7 +37,7 @@ Considering a remote URL like `http://some-server/api/foo`, where the fragment `
             [HttpMethod(HttpMethod.Post)]
             public void Add(Bar bar);
 
-4. For methods that should use parameter values as part of the query string, decorate them with a `ResourceAttribute` specifying a fragment with format codes, and the list of parameters used in the query string:
+4. For methods that should use parameter values as part of the query string, decorate them with `ResourceAttribute` specifying a fragment with format codes, and the list of parameters used in the query string:
 
             // GET /foo/1
             [Resource("{0}", "id")]
