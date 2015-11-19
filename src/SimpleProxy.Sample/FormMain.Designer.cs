@@ -50,10 +50,18 @@
             this.lstPageMethodsWebForms = new System.Windows.Forms.ListView();
             this.columnHeader5 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeader6 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.tabRestWebApi2 = new System.Windows.Forms.TabPage();
+            this.btnRestWebApi2Delete = new System.Windows.Forms.Button();
+            this.btnRestWebApi2Edit = new System.Windows.Forms.Button();
+            this.btnRestWebApi2Add = new System.Windows.Forms.Button();
+            this.lstRestWebApi2 = new System.Windows.Forms.ListView();
+            this.columnHeader7 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.columnHeader8 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.tbcMain.SuspendLayout();
             this.tbpRestWebApi.SuspendLayout();
             this.tbpRestWcf.SuspendLayout();
             this.tbpPageMethodsWebForms.SuspendLayout();
+            this.tabRestWebApi2.SuspendLayout();
             this.SuspendLayout();
             // 
             // tbcMain
@@ -62,6 +70,7 @@
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.tbcMain.Controls.Add(this.tbpRestWebApi);
+            this.tbcMain.Controls.Add(this.tabRestWebApi2);
             this.tbcMain.Controls.Add(this.tbpRestWcf);
             this.tbcMain.Controls.Add(this.tbpPageMethodsWebForms);
             this.tbcMain.Location = new System.Drawing.Point(12, 12);
@@ -284,6 +293,77 @@
             // 
             this.columnHeader6.Text = "Bar";
             // 
+            // tabRestWebApi2
+            // 
+            this.tabRestWebApi2.Controls.Add(this.btnRestWebApi2Delete);
+            this.tabRestWebApi2.Controls.Add(this.btnRestWebApi2Edit);
+            this.tabRestWebApi2.Controls.Add(this.btnRestWebApi2Add);
+            this.tabRestWebApi2.Controls.Add(this.lstRestWebApi2);
+            this.tabRestWebApi2.Location = new System.Drawing.Point(4, 22);
+            this.tabRestWebApi2.Name = "tabRestWebApi2";
+            this.tabRestWebApi2.Padding = new System.Windows.Forms.Padding(3);
+            this.tabRestWebApi2.Size = new System.Drawing.Size(540, 435);
+            this.tabRestWebApi2.TabIndex = 3;
+            this.tabRestWebApi2.Text = "REST WebApi 2";
+            this.tabRestWebApi2.UseVisualStyleBackColor = true;
+            // 
+            // btnRestWebApi2Delete
+            // 
+            this.btnRestWebApi2Delete.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.btnRestWebApi2Delete.Location = new System.Drawing.Point(459, 403);
+            this.btnRestWebApi2Delete.Name = "btnRestWebApi2Delete";
+            this.btnRestWebApi2Delete.Size = new System.Drawing.Size(75, 26);
+            this.btnRestWebApi2Delete.TabIndex = 7;
+            this.btnRestWebApi2Delete.Text = "Delete";
+            this.btnRestWebApi2Delete.UseVisualStyleBackColor = true;
+            this.btnRestWebApi2Delete.Click += new System.EventHandler(this.btnRestWebApi2Delete_Click);
+            // 
+            // btnRestWebApi2Edit
+            // 
+            this.btnRestWebApi2Edit.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.btnRestWebApi2Edit.Location = new System.Drawing.Point(378, 403);
+            this.btnRestWebApi2Edit.Name = "btnRestWebApi2Edit";
+            this.btnRestWebApi2Edit.Size = new System.Drawing.Size(75, 26);
+            this.btnRestWebApi2Edit.TabIndex = 6;
+            this.btnRestWebApi2Edit.Text = "Edit";
+            this.btnRestWebApi2Edit.UseVisualStyleBackColor = true;
+            this.btnRestWebApi2Edit.Click += new System.EventHandler(this.btnRestWebApi2Edit_Click);
+            // 
+            // btnRestWebApi2Add
+            // 
+            this.btnRestWebApi2Add.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.btnRestWebApi2Add.Location = new System.Drawing.Point(297, 403);
+            this.btnRestWebApi2Add.Name = "btnRestWebApi2Add";
+            this.btnRestWebApi2Add.Size = new System.Drawing.Size(75, 26);
+            this.btnRestWebApi2Add.TabIndex = 5;
+            this.btnRestWebApi2Add.Text = "Add";
+            this.btnRestWebApi2Add.UseVisualStyleBackColor = true;
+            this.btnRestWebApi2Add.Click += new System.EventHandler(this.btnRestWebApi2Add_Click);
+            // 
+            // lstRestWebApi2
+            // 
+            this.lstRestWebApi2.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.lstRestWebApi2.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
+            this.columnHeader7,
+            this.columnHeader8});
+            this.lstRestWebApi2.FullRowSelect = true;
+            this.lstRestWebApi2.Location = new System.Drawing.Point(6, 6);
+            this.lstRestWebApi2.Name = "lstRestWebApi2";
+            this.lstRestWebApi2.Size = new System.Drawing.Size(528, 391);
+            this.lstRestWebApi2.TabIndex = 4;
+            this.lstRestWebApi2.UseCompatibleStateImageBehavior = false;
+            this.lstRestWebApi2.View = System.Windows.Forms.View.Details;
+            // 
+            // columnHeader7
+            // 
+            this.columnHeader7.Text = "Id";
+            // 
+            // columnHeader8
+            // 
+            this.columnHeader8.Text = "Bar";
+            // 
             // FormMain
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -297,6 +377,7 @@
             this.tbpRestWebApi.ResumeLayout(false);
             this.tbpRestWcf.ResumeLayout(false);
             this.tbpPageMethodsWebForms.ResumeLayout(false);
+            this.tabRestWebApi2.ResumeLayout(false);
             this.ResumeLayout(false);
 
         }
@@ -325,6 +406,13 @@
         private System.Windows.Forms.ListView lstPageMethodsWebForms;
         private System.Windows.Forms.ColumnHeader columnHeader5;
         private System.Windows.Forms.ColumnHeader columnHeader6;
+        private System.Windows.Forms.TabPage tabRestWebApi2;
+        private System.Windows.Forms.Button btnRestWebApi2Delete;
+        private System.Windows.Forms.Button btnRestWebApi2Edit;
+        private System.Windows.Forms.Button btnRestWebApi2Add;
+        private System.Windows.Forms.ListView lstRestWebApi2;
+        private System.Windows.Forms.ColumnHeader columnHeader7;
+        private System.Windows.Forms.ColumnHeader columnHeader8;
     }
 }
 

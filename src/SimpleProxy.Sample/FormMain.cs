@@ -41,9 +41,12 @@ namespace SimpleProxy.Example
                     Wrap(() => RestWebApiRefresh());
                     break;
                 case 1:
-                    Wrap(() => RestWcfRefresh());
+                    Wrap(() => RestWebApi2Refresh());
                     break;
                 case 2:
+                    Wrap(() => RestWcfRefresh());
+                    break;
+                case 3:
                     Wrap(() => PageMethodsWebFormsRefresh());
                     break;
             }
@@ -158,12 +161,122 @@ namespace SimpleProxy.Example
 
         #endregion
 
+        #region REST WebApi 2
+
+
+        private void RestWebApi2Refresh()
+        {
+            ProxyConfiguration config = new ProxyConfiguration("http://localhost:59876/api");
+            IFooRest fooSvc = SimpleProxy.Proxy.For<IFooRest2>(config);
+
+            IEnumerable<Foo> foos = fooSvc.FindAll();
+
+            lstRestWebApi2.Items.Clear();
+
+            foreach (Foo foo in foos)
+            {
+                lstRestWebApi2.Items.Add(foo.ToListViewItem());
+            }
+        }
+
+        private void RestWebApi2Add()
+        {
+            string bar = BarDialog.ShowDialog(string.Empty);
+
+            ProxyConfiguration config = new ProxyConfiguration("http://localhost:59876/api");
+            IFooRest fooSvc = SimpleProxy.Proxy.For<IFooRest2>(config);
+
+            fooSvc.Add(new Foo { Bar = bar });
+
+            RestWebApi2Refresh();
+        }
+
+        private void RestWebApi2Update()
+        {
+            if (lstRestWebApi2.SelectedItems.Count != 1)
+            {
+                MessageBox.Show("Please select one item in the list.", "REST WebApi 2 - Update");
+                return;
+            }
+
+            int theId = 0;
+
+            if (int.TryParse((string)lstRestWebApi2.SelectedItems[0].Tag, out theId))
+            {
+                ProxyConfiguration config = new ProxyConfiguration("http://localhost:59876/api");
+                IFooRest fooSvc = SimpleProxy.Proxy.For<IFooRest2>(config);
+
+                Foo foo = fooSvc.GetById(theId);
+
+                string theBar = BarDialog.ShowDialog(foo.Bar);
+
+                if (null != theBar)
+                {
+                    foo.Bar = theBar;
+
+                    fooSvc.Update(foo.Id, foo);
+                }
+            }
+            else
+            {
+                MessageBox.Show("Invalid Foo.", "REST WebApi 2 - Update");
+
+                lstRestWebApi2.SelectedItems.Clear();
+            }
+
+            RestWebApi2Refresh();
+        }
+
+        private void RestWebApi2Delete()
+        {
+            if (lstRestWebApi2.SelectedItems.Count != 1)
+            {
+                MessageBox.Show("Please select one item in the list.", "REST WebApi 2 - Delete");
+                return;
+            }
+
+            int theId = 0;
+
+            if (int.TryParse((string)lstRestWebApi2.SelectedItems[0].Tag, out theId))
+            {
+                ProxyConfiguration config = new ProxyConfiguration("http://localhost:59876/api");
+                IFooRest fooSvc = SimpleProxy.Proxy.For<IFooRest2>(config);
+
+                fooSvc.Delete(theId);
+            }
+            else
+            {
+                MessageBox.Show("Invalid Foo.", "REST WebApi 2 - Delete");
+
+                lstRestWebApi2.SelectedItems.Clear();
+            }
+
+            RestWebApi2Refresh();
+        }
+
+        private void btnRestWebApi2Add_Click(object sender, EventArgs e)
+        {
+            Wrap(() => RestWebApi2Add());
+        }
+
+        private void btnRestWebApi2Edit_Click(object sender, EventArgs e)
+        {
+            Wrap(() => RestWebApi2Update());
+        }
+
+        private void btnRestWebApi2Delete_Click(object sender, EventArgs e)
+        {
+            Wrap(() => RestWebApi2Delete());
+        }
+
+        #endregion
+
         #region REST Wcf
 
         private void RestWcfRefresh()
         {
             ProxyConfiguration config = new ProxyConfiguration("http://localhost:59877");
-            IFooRest2 fooSvc = SimpleProxy.Proxy.For<IFooRest2>(config);
+            IFooRestWcf fooSvc = SimpleProxy.Proxy.For<IFooRestWcf>(config);
 
             IEnumerable<Foo> foos = fooSvc.FindAll();
 
@@ -180,7 +293,7 @@ namespace SimpleProxy.Example
             string bar = BarDialog.ShowDialog(string.Empty);
 
             ProxyConfiguration config = new ProxyConfiguration("http://localhost:59877");
-            IFooRest2 fooSvc = SimpleProxy.Proxy.For<IFooRest2>(config);
+            IFooRestWcf fooSvc = SimpleProxy.Proxy.For<IFooRestWcf>(config);
 
             fooSvc.Add(new Foo { Bar = bar });
 
@@ -200,7 +313,7 @@ namespace SimpleProxy.Example
             if (int.TryParse((string)lstRestWcf.SelectedItems[0].Tag, out theId))
             {
                 ProxyConfiguration config = new ProxyConfiguration("http://localhost:59877");
-                IFooRest2 fooSvc = SimpleProxy.Proxy.For<IFooRest2>(config);
+                IFooRestWcf fooSvc = SimpleProxy.Proxy.For<IFooRestWcf>(config);
 
                 Foo foo = fooSvc.GetById(theId);
 
@@ -236,7 +349,7 @@ namespace SimpleProxy.Example
             if (int.TryParse((string)lstRestWcf.SelectedItems[0].Tag, out theId))
             {
                 ProxyConfiguration config = new ProxyConfiguration("http://localhost:59877");
-                IFooRest2 fooSvc = SimpleProxy.Proxy.For<IFooRest2>(config);
+                IFooRestWcf fooSvc = SimpleProxy.Proxy.For<IFooRestWcf>(config);
 
                 fooSvc.Delete(theId);
             }
@@ -379,6 +492,7 @@ namespace SimpleProxy.Example
         }
 
         #endregion
+
     }
 
     public static class FooExtensions
