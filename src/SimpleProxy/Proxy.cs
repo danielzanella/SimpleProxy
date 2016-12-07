@@ -154,31 +154,59 @@
                     Dictionary<string, object> toSerialize = new Dictionary<string, object>();
                     Dictionary<string, string> toQueryString = new Dictionary<string, string>();
 
+                    ParameterInfo[] parameters = methodCall.MethodBase.GetParameters();
+
                     // Determines which arguments should be used in the querystring parameters, and which arguments will be serialized and posted.
                     for (int argIndex = 0, argCount = methodCall.InArgCount; argIndex < argCount; argIndex++)
                     {
                         object value = methodCall.GetInArg(argIndex);
 
-                        if (null == value || value.GetType().IsPrimitiveOrBasicStruct())
+                        ParameterInfo parameterInfo = parameters[argIndex];
+
+                        bool isFromUri = parameterInfo.GetCustomAttributes(true).Any(a => a.GetType().Name == "FromUriAttribute");
+                        Type valueType = null != value ? value.GetType() : null;
+                        bool isPrimitive = null != valueType ? valueType.IsPrimitiveOrBasicStruct() : true;
+
+                        if (null == value || isPrimitive || isFromUri)
                         {
                             if (null != value && value is DateTime)
                             {
-                                value = ((DateTime)value).ToLocalTime();
-
-                                StringBuilder sb = new StringBuilder();
-                                using (TextWriter writer = new StringWriter(sb, invariantCulture))
-                                {
-                                    this.m_jsonSerializer.Serialize(writer, value);
-                                }
-
-                                value = sb.ToString();
-                                value = ((string)value).Substring(1, ((string)value).Length - 2);
+                                value = SerializeDateTime(invariantCulture, value);
 
                                 toQueryString.Add(methodCall.GetInArgName(argIndex), (value != null) ? value.ToString() : string.Empty);
                             }
                             else
                             {
-                                toQueryString.Add(methodCall.GetInArgName(argIndex), (value != null) ? HttpUtility.UrlEncode(value.ToString()) : string.Empty);
+                                if (null != value && !isPrimitive)
+                                {
+                                    string prefix = methodCall.GetInArgName(argIndex);
+
+                                    foreach (PropertyInfo property in valueType.GetProperties(BindingFlags.Public | BindingFlags.Instance | BindingFlags.GetProperty))
+                                    {
+                                        string propName = string.Format(invariantCulture, "{0}.{1}", prefix, property.Name);
+                                        if (!property.PropertyType.IsPrimitiveOrBasicStruct()) 
+                                        {
+                                            throw new NotSupportedException(string.Format(invariantCulture, "Unable to serializa value for GET query string argument named '{0}'", propName));
+                                        }
+
+                                        object propValue = property.GetValue(value);
+
+                                        if (null != propValue && propValue is DateTime)
+                                        {
+                                            propValue = SerializeDateTime(invariantCulture, propValue);
+
+                                            toQueryString.Add(propName, (propValue != null) ? propValue.ToString() : string.Empty);
+                                        }
+                                        else
+                                        {
+                                            toQueryString.Add(propName, (propValue != null) ? HttpUtility.UrlEncode(propValue.ToString()) : string.Empty);
+                                        }
+                                    }
+                                }
+                                else
+                                {
+                                    toQueryString.Add(methodCall.GetInArgName(argIndex), (value != null) ? HttpUtility.UrlEncode(value.ToString()) : string.Empty);
+                                }
                             }
                         }
                         else
@@ -191,7 +219,7 @@
                         // Prepare the post content.
                         byte[] postData = null;
 
-                        string responseData;
+                        string responseData = null;
 
                         if (toSerialize.Count > 0)
                         {
@@ -286,135 +314,154 @@
                         }
 
                         HttpWebResponse response = null;
+                        Stream responseStream = null;
 
+                        try
                         {
-                            Stopwatch timer = Stopwatch.StartNew();
-
-                            try
                             {
-                                // Add a HTTP header with a random number to help tracking the request here and on the remote server
-                                int randomNumber = new Random().Next(int.MaxValue);
+                                Stopwatch timer = Stopwatch.StartNew();
 
-                                webRequest.Headers["X-SP-Unique-Identifier"] = randomNumber.ToString(invariantCulture);
-
-                                // Send the request
-                                response = (HttpWebResponse)webRequest.GetResponse();
-                            }
-                            catch (WebException ex)
-                            {
-                                string errorContent = null;
-
-                                if (ex.Response != null)
+                                try
                                 {
-                                    context.ResponseStatus = (int)((HttpWebResponse)ex.Response).StatusCode;
+                                    // Add a HTTP header with a random number to help tracking the request here and on the remote server
+                                    int randomNumber = new Random().Next(int.MaxValue);
 
-                                    if (ex.Response.ContentLength != 0)
+                                    webRequest.Headers["X-SP-Unique-Identifier"] = randomNumber.ToString(invariantCulture);
+
+                                    // Send the request
+                                    response = (HttpWebResponse)webRequest.GetResponse();
+                                }
+                                catch (WebException ex)
+                                {
+                                    string errorContent = null;
+
+                                    if (ex.Response != null)
                                     {
-                                        using (var stream = ex.Response.GetResponseStream())
-                                        {
-                                            if (null != stream)
-                                            {
-                                                using (var reader = new StreamReader(stream))
-                                                {
-                                                    errorContent = reader.ReadToEnd();
+                                        context.ResponseStatus = (int)((HttpWebResponse)ex.Response).StatusCode;
 
-                                                    context.ResponseSize = errorContent.Length;
+                                        if (ex.Response.ContentLength != 0)
+                                        {
+                                            using (var stream = ex.Response.GetResponseStream())
+                                            {
+                                                if (null != stream)
+                                                {
+                                                    using (var reader = new StreamReader(stream))
+                                                    {
+                                                        errorContent = reader.ReadToEnd();
+
+                                                        context.ResponseSize = errorContent.Length;
+                                                    }
                                                 }
                                             }
-                                        }
 
-                                        string errorResult = null;
+                                            string errorResult = null;
 
-                                        if (null != errorContent)
-                                        {
-                                            using (StringReader r = new StringReader(errorContent))
+                                            if (null != errorContent)
                                             {
-                                                errorResult = r.ReadToEnd();
+                                                using (StringReader r = new StringReader(errorContent))
+                                                {
+                                                    errorResult = r.ReadToEnd();
+                                                }
+                                            }
+
+                                            if (!string.IsNullOrWhiteSpace(errorResult))
+                                            {
+                                                context.ResponseContent = errorResult;
+
+                                                throw new ProxyException(errorResult, (HttpWebResponse)ex.Response);
                                             }
                                         }
-
-                                        if (!string.IsNullOrWhiteSpace(errorResult))
-                                        {
-                                            context.ResponseContent = errorResult;
-
-                                            throw new ProxyException(errorResult, (HttpWebResponse)ex.Response);
-                                        }
                                     }
+
+                                    throw new ProxyException(string.Format(invariantCulture, "Exception caught while performing a {0} request to url '{1}'. {2}: {3}", httpMethod.ToString(), serviceUrl, ex.GetType().Name, ex.Message), ex);
                                 }
-
-                                throw new ProxyException(string.Format(invariantCulture, "Exception caught while performing a {0} request to url '{1}'. {2}: {3}", httpMethod.ToString(), serviceUrl, ex.GetType().Name, ex.Message), ex);
-                            }
-                            finally
-                            {
-                                var elapsedMilliseconds = timer.ElapsedMilliseconds;
-
-                                timer.Stop();
-
-                                context.RequestElapsedMilliseconds = elapsedMilliseconds;
-                                context.RequestElapsedTime = new TimeSpan(0, 0, 0, 0, (int)elapsedMilliseconds);
-                            }
-
-                            context.ResponseHeaders.Clear();
-
-                            // Add the response information to the context
-                            for (int index = 0, total = response.Headers.Count; index < total; index++)
-                            {
-                                context.ResponseHeaders[response.Headers.GetKey(index)] = response.Headers.Get(index);
-                            }
-
-                            context.ResponseStatus = (int)response.StatusCode;
-
-                            if ((int)response.StatusCode >= 400)
-                            {
-                                throw new ProxyException("Invalid HTTP status code.", response);
-                            }
-
-                            // Read the response contents
-                            Stream responseStream = response.GetResponseStream();
-                            
-                            using (StreamReader responseReader = new StreamReader(responseStream))
-                            {
-                                responseData = responseReader.ReadToEnd();
-
-                                // note: context.ResponseSize should be in bytes, not string length
-                                // ContentLength should be length reported in the Content-Length header (number of octets)
-                                context.ResponseSize = response.ContentLength;
-
-                                context.ResponseContent = responseData;
-
-                                responseReader.Close();
-                            }
-
-                            responseStream.Close();
-                            response.Close();
-                        }
-
-                        // Attempt to deserialize the response contents
-                        if (context.ResponseHeaders.ContainsKey("Content-Type"))
-                        {
-                            string contentType = (context.ResponseHeaders["Content-Type"] ?? string.Empty).Split(';').FirstOrDefault(h => !h.Trim().StartsWith("charset", StringComparison.OrdinalIgnoreCase));
-
-                            string temp = contentType.Split('/').Last();
-
-                            if (temp.EndsWith("json", StringComparison.OrdinalIgnoreCase) || temp.EndsWith("javascript", StringComparison.OrdinalIgnoreCase))
-                            {
-                                using (StringReader r = new StringReader(responseData))
+                                finally
                                 {
-                                    using (JsonReader r2 = new JsonTextReader(r))
-                                    {
-                                        r2.DateTimeZoneHandling = DateTimeZoneHandling.Utc;
+                                    var elapsedMilliseconds = timer.ElapsedMilliseconds;
 
-                                        if (expectedReturn != typeof(void))
-                                        {
-                                            retVal = this.m_jsonSerializer.Deserialize(r2, expectedReturn);
-                                        }
+                                    timer.Stop();
+
+                                    context.RequestElapsedMilliseconds = elapsedMilliseconds;
+                                    context.RequestElapsedTime = new TimeSpan(0, 0, 0, 0, (int)elapsedMilliseconds);
+                                }
+
+                                context.ResponseHeaders.Clear();
+
+                                // Add the response information to the context
+                                for (int index = 0, total = response.Headers.Count; index < total; index++)
+                                {
+                                    context.ResponseHeaders[response.Headers.GetKey(index)] = response.Headers.Get(index);
+                                }
+
+                                context.ResponseStatus = (int)response.StatusCode;
+
+                                if ((int)response.StatusCode >= 400)
+                                {
+                                    throw new ProxyException("Invalid HTTP status code.", response);
+                                }
+
+                                // Read the response contents
+                                responseStream = response.GetResponseStream();
+
+                                if (expectedReturn == typeof(Stream))
+                                {
+                                    MemoryStream memoryStream = new MemoryStream();
+
+                                    responseStream.CopyTo(memoryStream);
+
+                                    memoryStream.Seek(0, SeekOrigin.Begin);
+
+                                    retVal = memoryStream;
+                                }
+                                else
+                                {
+                                    using (StreamReader responseReader = new StreamReader(responseStream))
+                                    {
+                                        responseData = responseReader.ReadToEnd();
+
+                                        // note: context.ResponseSize should be in bytes, not string length
+                                        // ContentLength should be length reported in the Content-Length header (number of octets)
+                                        context.ResponseSize = response.ContentLength;
+
+                                        context.ResponseContent = responseData;
+
+                                        responseReader.Close();
                                     }
                                 }
                             }
-                            else
+
+                            // Attempt to deserialize the response contents
+                            if (null == retVal && context.ResponseHeaders.ContainsKey("Content-Type"))
                             {
-                                throw new ProxyException("Unknown response content type: " + contentType, response);
+                                string contentType = (context.ResponseHeaders["Content-Type"] ?? string.Empty).Split(';').FirstOrDefault(h => !h.Trim().StartsWith("charset", StringComparison.OrdinalIgnoreCase));
+
+                                string temp = contentType.Split('/').Last();
+
+                                if (temp.EndsWith("json", StringComparison.OrdinalIgnoreCase) || temp.EndsWith("javascript", StringComparison.OrdinalIgnoreCase))
+                                {
+                                    using (StringReader r = new StringReader(responseData))
+                                    {
+                                        using (JsonReader r2 = new JsonTextReader(r))
+                                        {
+                                            r2.DateTimeZoneHandling = DateTimeZoneHandling.Utc;
+
+                                            if (expectedReturn != typeof(void))
+                                            {
+                                                retVal = this.m_jsonSerializer.Deserialize(r2, expectedReturn);
+                                            }
+                                        }
+                                    }
+                                }
+                                else if (expectedReturn != typeof(Stream))
+                                {
+                                    throw new ProxyException("Unknown response content type: " + contentType, response);
+                                }
                             }
+                        }
+                        finally
+                        {
+                            if (null != responseStream) responseStream.Close();
+                            if (null != response) response.Close();
                         }
                     }
 
@@ -433,6 +480,21 @@
             {
                 throw new NotSupportedException();
             }
+        }
+
+        private object SerializeDateTime(System.Globalization.CultureInfo invariantCulture, object value)
+        {
+            value = ((DateTime)value).ToLocalTime();
+
+            StringBuilder sb = new StringBuilder();
+            using (TextWriter writer = new StringWriter(sb, invariantCulture))
+            {
+                this.m_jsonSerializer.Serialize(writer, value);
+            }
+
+            value = sb.ToString();
+            value = ((string)value).Substring(1, ((string)value).Length - 2);
+            return value;
         }
     }
 }
