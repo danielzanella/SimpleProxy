@@ -155,6 +155,8 @@
                     Dictionary<string, string> toQueryString = new Dictionary<string, string>();
 
                     ParameterInfo[] parameters = methodCall.MethodBase.GetParameters();
+                    bool hasStreamArg = false;
+                    Stream postStream = null;
 
                     // Determines which arguments should be used in the querystring parameters, and which arguments will be serialized and posted.
                     for (int argIndex = 0, argCount = methodCall.InArgCount; argIndex < argCount; argIndex++)
@@ -162,6 +164,11 @@
                         object value = methodCall.GetInArg(argIndex);
 
                         ParameterInfo parameterInfo = parameters[argIndex];
+                        if (value is Stream)
+                        {
+                            postStream = (Stream)value;
+                            hasStreamArg = true;
+                        }
 
                         bool isFromUri = parameterInfo.GetCustomAttributes(true).Any(a => a.GetType().Name == "FromUriAttribute");
                         Type valueType = null != value ? value.GetType() : null;
@@ -215,13 +222,15 @@
                         }
                     }
 
+                    bool postStreamDirectly = (httpMethod == HttpMethod.Post || httpMethod == HttpMethod.Put) && hasStreamArg && toSerialize.Count == 1;
+
                     {
                         // Prepare the post content.
                         byte[] postData = null;
 
                         string responseData = null;
 
-                        if (toSerialize.Count > 0)
+                        if (toSerialize.Count > 0 && !postStreamDirectly)
                         {
                             StringBuilder sb = new StringBuilder();
                             using (TextWriter writer = new StringWriter(sb, invariantCulture))
@@ -239,7 +248,7 @@
                             postData = Encoding.UTF8.GetBytes(sb.ToString());
                         }
 
-                        if ((postData == null || postData.Length == 0) && httpMethod != HttpMethod.Get)
+                        if ((postData == null || postData.Length == 0) && httpMethod != HttpMethod.Get && !postStreamDirectly)
                         {
                             postData = Encoding.UTF8.GetBytes("{}");
                         }
@@ -294,22 +303,37 @@
                             webRequest.Method = httpMethod.ToString().ToUpper();
                             webRequest.Timeout = this.Configuration.RequestTimeout ?? (5 * 60 * 1000);
 
+                            string contentTypeHeader = null;
+
                             if (null != this.Configuration.RequestHeaders) 
                             {
                                 foreach (var kvp in this.Configuration.RequestHeaders)
                                 {
+                                    if (kvp.Key.ToLowerInvariant() == "content-type")
+                                    {
+                                        contentTypeHeader = kvp.Value;
+                                        continue;
+                                    }
                                     webRequest.Headers[kvp.Key] = kvp.Value;
                                 }
                             }
 
-                            if (null != postData && postData.Length > 0)
+                            if (postStreamDirectly)
+                            {
+                                webRequest.ContentType = contentTypeHeader ?? "application/octet-stream";
+                                webRequest.ContentLength = postStream.Length;
+
+                                Stream requestStream = webRequest.GetRequestStream();
+                                postStream.CopyTo(requestStream);
+                            }
+                            else if (null != postData && postData.Length > 0)
                             {
                                 webRequest.ContentLength = postData.Length;
-                                webRequest.ContentType = "application/json; charset=UTF-8";
+                                webRequest.ContentType = contentTypeHeader ?? "application/json; charset=UTF-8";
 
-                                Stream postStream = webRequest.GetRequestStream();
-                                postStream.Write(postData, 0, postData.Length);
-                                postStream.Close();
+                                Stream postStream2 = webRequest.GetRequestStream();
+                                postStream2.Write(postData, 0, postData.Length);
+                                postStream2.Close();
                             }
                         }
 
