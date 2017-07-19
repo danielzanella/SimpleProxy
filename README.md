@@ -37,7 +37,7 @@ Considering a remote URL like `http://some-server/api/foo`, where the fragment `
             [HttpMethod(HttpMethod.Post)]
             public void Add(Bar bar);
 
-4. For methods that should use parameter values as part of the query string, decorate them with `ResourceAttribute` specifying a fragment with format codes, and the list of parameters used in the query string:
+4. For methods that should use parameter values as part of the URL, decorate them with `ResourceAttribute` specifying a fragment with format codes, and the list of parameters used in the query string:
 
             // GET /foo/1
             [Resource("{0}", "id")]
@@ -48,7 +48,7 @@ Considering a remote URL like `http://some-server/api/foo`, where the fragment `
             var configuration = new ProxyConfiguration("http://some-server/api");
             var remote = Proxy.For<IFoo>(configuration);
 
-            var allBars = remote.GetAllBars();
+            var allBars = remote.GetAllBars(); // GET http://some-server/api/foo/
 
 6. Optionally, add request headers to the configuration object before you create the proxy instance:
 
